@@ -20,17 +20,20 @@ class VaultReader {
             method: "kubernetes",
             role: "default",
             debug: false,
+            ignoreLocalToken: false,
             ...opts,
         };
         this.token = null;
     }
 
     async getToken() {
-        const { uri, method, role, debug } = this.opts;
+        const { uri, method, role, debug, ignoreLocalToken } = this.opts;
         let vaultToken;
-        if (fs.existsSync(VAULT_TOKEN_PATH)) {
+
+        if (!ignoreLocalToken && fs.existsSync(VAULT_TOKEN_PATH)) {
             vaultToken = fs.readFileSync(VAULT_TOKEN_PATH).toString();
             debug && console.log("read local vault token:", vaultToken);
+
         } else if (fs.existsSync(K8S_SA_TOKEN_PATH)) {
             const k8sSAToken = fs.readFileSync(K8S_SA_TOKEN_PATH).toString();
             debug && console.log("read k8s sa token:", k8sSAToken);
@@ -45,6 +48,7 @@ class VaultReader {
 
             debug && console.log("issued vault token with k8s sa token:", vaultToken);
         }
+
         this.token = vaultToken;
     }
 
