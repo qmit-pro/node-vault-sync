@@ -1,9 +1,9 @@
 # node-vault-sync
 
-Generate configuration object from HashiCorp Vault by automatic authenticating with ***locally cached token*** or ***kubernetes*** service account in pod environment.
+Generate configuration object ***synchronously*** from HashiCorp Vault by automatic authenticating with ***locally cached token*** or ***kubernetes*** service account in pod environment.
 
 ## 1. About
-- This module is built for removal of Secret and ConfigMap mount for applications in kubernetes to pursue identical way between local development and remote deployment in kubernetes. 
+- This module is built to pursue identical configuration mount way between local development and remote deployment in kubernetes. 
 - This module exports a single function to create an JavaScript Object (or any type).
 - The function works in synchronous way by mimicking RPC call for asynchronous HTTP requests. It is a bad practice, but this is for the synchronous configuration loading at bootstrap.
 - How it works:
@@ -11,45 +11,66 @@ Generate configuration object from HashiCorp Vault by automatic authenticating w
     - If there is no cached token, it will try to auth to vault with kubernetes service account token (`/var/run/secrets/kubernetes.io/serviceaccount/token`).
     - If there is no kubernetes service account token, it will throw an error.
     - If got error while reading secrets it will throw the original error.
-    - It will always try to parse fetched data as JSON, even if failed it will not throw any error.
+- Requirements:
+    - vault server with kubernetes auth method enabled.
 
 ## 2. Usage
 #### Install
+
+##### npm
+```bash
+$ npm i --save node-vault-sync
+```
+
+##### nightly build
 ```bash
 $ npm i --save qmit-pro/node-vault-sync
 ```
 
-#### ./config.js
+
+#### ./sync-config.js
 ```js
 const vault = require("node-vault-sync");
 
-module.exports = vault(get => {
+module.exports = vault(async read => {
     return {
-        app: get("secret/app"),
-        db: get("database/app"),
+        app: (await read("secret/data/test")).data.hello,
         foo: {
-            text: get("secret/some-text"),
+            db: (await read("database/mysql/test")),
             foo: "other-property",
             bar: [1,2,3],
-        },
-        bar() {
-            // ...
         },
     };
 }, {
     // vault connection setting
-    uri: "http://server.vault.svc.cluster.local",
-    role: "default", // /auth/kubernetes/role/:role
+    uri: "https://server.vault.svc.cluster.local",
+    debug: false,
+    
+    // alternative auth method for kubernetes pod
+    method: "kubernetes",
+    role: "default",
 });
 ```
 
-#### ./index.js
+#### ./sync-example.js
 ```js
-const config = require("./config");
+const config = require("./sync-config");
 
 // Work with config
 console.log(config);
 ```
+
+#### ./async-config-example.js
+```js
+const vault = require("node-vault-sync");
+
+// rather do asynchronously
+vault.async(async read => { ... }, { ... })
+    .then(config => {
+        console.log(config);
+    })
+```
+
 
 ## 3. Development
 ### Test
@@ -57,4 +78,9 @@ Currently it dose not provide mocking environment for Vault and Kubernetes.
 Configure your vault environment and use telepresence for k8s to test.
 ```
 npm test
+```
+
+### Mocking K8S pod environment
+```
+sudo sh -c "mkdir -p /var/run/secrets/kubernetes.io/serviceaccount/ && kubectl get -n default secret $(kubectl get sa default -n default -o jsonpath='{.secrets[0].name}') -o json | jq '.data.token' -r | base64 -D > /var/run/secrets/kubernetes.io/serviceaccount/token"
 ```

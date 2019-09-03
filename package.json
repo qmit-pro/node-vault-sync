@@ -4,7 +4,7 @@
   "description": "Generate configuration object from HashiCorp Vault by automatic authenticating with local token or kubernetes service account in pod environment.",
   "main": "index.js",
   "scripts": {
-    "test": "jest ./test"
+    "test": "jest ./test --detectOpenHandles"
   },
   "repository": {
     "type": "git",

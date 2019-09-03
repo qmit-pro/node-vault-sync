@@ -3,60 +3,74 @@ const path = require("path");
 const fetch = require("node-fetch");
 const VAULT_TOKEN_PATH = path.join(process.env.HOME, ".vault-token");
 const K8S_SA_TOKEN_PATH = "/var/run/secrets/kubernetes.io/serviceaccount/token";
-const K8S_API_HOST = "https://kubernetes.default.svc.cluter.local";
 
-
-async function makeAsync(factory = (get) => {}, opts = {}) {// for jest bug
+async function makeAsync(factory = (read) => {}, opts = {}) {// for jest bug
     // validate arguments
     if (typeof factory != "function") throw new Error("First argument should be a factory function which returns configuration value");
     if (typeof opts != "object") throw new Error("Second argument should be a object for Vault connection option");
-    opts = {
-        uri: "http://server.vault.svc.cluster.local",
-        role: "default",
-        debug: false,
-        ...opts,
-    };
 
-    // get local token
-    let vaultToken;
-    if (hasVaultToken()) {
-        vaultToken = readVaultToken();
-        opts.debug && console.log("read local vault token:", vaultToken);
-    } else if (hasKubenetesSAToken()) {
-        const k8sSAToken = readKubenetesSAToken();
-        const result = await fetch(opts.uri + "/v1/auth/kubernetes/login", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body:    JSON.stringify({ jwt: k8sSAToken, role: opts.role, }),
-        })
-            .then(res => res.json());
+    const reader = new VaultReader(opts);
+    return await reader.readWithFactory(factory);
+}
 
-        opts.debug && console.log("read Kubernetes SA token:", k8sSAToken);
-        console.log(result);
+class VaultReader {
+    constructor(opts = {}) {
+        this.opts = {
+            uri: "https://server.vault.svc.cluster.local",
+            method: "kubernetes",
+            role: "default",
+            debug: false,
+            ...opts,
+        };
+        this.token = null;
     }
 
-    // return fetch(opts.uri)
-    //     .then(res => res.text())
-    //     .then(res => console.log(res));
+    async getToken() {
+        const { uri, method, role, debug } = this.opts;
+        let vaultToken;
+        if (fs.existsSync(VAULT_TOKEN_PATH)) {
+            vaultToken = fs.readFileSync(VAULT_TOKEN_PATH).toString();
+            debug && console.log("read local vault token:", vaultToken);
+        } else if (fs.existsSync(K8S_SA_TOKEN_PATH)) {
+            const k8sSAToken = fs.readFileSync(K8S_SA_TOKEN_PATH).toString();
+            debug && console.log("read k8s sa token:", k8sSAToken);
 
-    // for jest bug
-    opts.debug && console.log("\n\n\n\n\n\n\n\n\n\n");
-}
+            vaultToken = await fetch(`${uri}/v1/auth/${method}/login`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body:    JSON.stringify({ jwt: k8sSAToken, role, }),
+            })
+                .then(res => res.json())
+                .then(req => req.auth.client_token);
 
-function hasVaultToken() {
-    return fs.existsSync(VAULT_TOKEN_PATH);
-}
+            debug && console.log("issued vault token with k8s sa token:", vaultToken);
+        }
+        this.token = vaultToken;
+    }
 
-function readVaultToken() {
-    return fs.readFileSync(VAULT_TOKEN_PATH).toString();
-}
+    async readWithFactory(factory = (read) => {}) {
+        return await factory(this.read.bind(this));
+    }
 
-function hasKubenetesSAToken() {
-    return fs.existsSync(K8S_SA_TOKEN_PATH);
-}
+    async read(itemPath) {
+        const { uri, debug } = this.opts;
+        const itemURI = `${uri}/v1/${itemPath}`;
 
-function readKubenetesSAToken() {
-    return fs.readFileSync(K8S_SA_TOKEN_PATH).toString();
+        if (!this.token) await this.getToken(); // lazy login
+
+        return await fetch(itemURI, {
+            method: "GET",
+            headers: { "X-Vault-Token": this.token },
+        })
+            .then(async res => {
+                const result = await res.json();
+                if (res.status >= 400) {
+                    const err = new Error(res.status + " Failed to fetch: " + itemURI);
+                    throw Object.assign(err, result);
+                }
+                return result.data;
+            });
+    }
 }
 
 module.exports = makeAsync;
