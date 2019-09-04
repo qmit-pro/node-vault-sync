@@ -4,37 +4,40 @@ const fetch = require("node-fetch");
 const VAULT_TOKEN_PATH = path.join(process.env.HOME, ".vault-token");
 const K8S_SA_TOKEN_PATH = "/var/run/secrets/kubernetes.io/serviceaccount/token";
 
-async function makeAsync(factory = (read) => {}, opts = {}) {// for jest bug
+async function makeAsync(factory, opts) {// for jest bug
     // validate arguments
     if (typeof factory != "function") throw new Error("First argument should be a factory function which returns configuration value");
-    if (typeof opts != "object") throw new Error("Second argument should be a object for Vault connection option");
+    else if (typeof opts != "object") throw new Error("Second argument should be a object for Vault connection option");
 
     const reader = new VaultReader(opts);
     return await reader.readWithFactory(factory);
 }
 
 class VaultReader {
-    constructor(opts = {}) {
+    constructor(opts) {
         this.opts = {
             uri: "https://server.vault.svc.cluster.local",
             method: "kubernetes",
             role: "default",
             debug: false,
             ignoreLocalToken: false,
+            ignoreK8sSAToken: false,
             ...opts,
         };
         this.token = null;
     }
 
     async getToken() {
-        const { uri, method, role, debug, ignoreLocalToken } = this.opts;
-        let vaultToken;
+        if (this.token) return;
+
+        const { uri, method, role, debug, ignoreLocalToken, ignoreK8sSAToken } = this.opts;
+        let vaultToken = null;
 
         if (!ignoreLocalToken && fs.existsSync(VAULT_TOKEN_PATH)) {
             vaultToken = fs.readFileSync(VAULT_TOKEN_PATH).toString();
             debug && console.log("read local vault token:", vaultToken);
 
-        } else if (fs.existsSync(K8S_SA_TOKEN_PATH)) {
+        } else if (!ignoreK8sSAToken && fs.existsSync(K8S_SA_TOKEN_PATH)) {
             const k8sSAToken = fs.readFileSync(K8S_SA_TOKEN_PATH).toString();
             debug && console.log("read k8s sa token:", k8sSAToken);
 
@@ -47,22 +50,24 @@ class VaultReader {
                 .then(req => req.auth.client_token);
 
             debug && console.log("issued vault token with k8s sa token:", vaultToken);
+        } else {
+            throw new Error("Failed to read both vault token and k8s service account token");
         }
 
         this.token = vaultToken;
     }
 
-    async readWithFactory(factory = (read) => {}) {
+    async readWithFactory(factory) {
         return await factory(this.read.bind(this));
     }
 
     async read(itemPath) {
-        const { uri, debug } = this.opts;
+        const { uri } = this.opts;
         const itemURI = `${uri}/v1/${itemPath}`;
 
-        if (!this.token) await this.getToken(); // lazy login
+        await this.getToken(); // lazy login
 
-        return await fetch(itemURI, {
+        return fetch(itemURI, {
             method: "GET",
             headers: { "X-Vault-Token": this.token },
         })

@@ -2,8 +2,13 @@
 
 Generate configuration object ***synchronously*** from HashiCorp Vault by automatic authenticating with ***locally cached token*** or ***kubernetes*** service account in pod environment.
 
+![coverage-lines](https://github.com/qmit-pro/node-vault-sync/raw/master/coverage/badge-lines.svg)
+![coverage-statements](https://github.com/qmit-pro/node-vault-sync/raw/master/coverage/badge-lines.svg)
+![coverage-functions](https://github.com/qmit-pro/node-vault-sync/raw/master/coverage/badge-functions.svg)
+![coverage-branches](https://github.com/qmit-pro/node-vault-sync/raw/master/coverage/badge-branches.svg)
+
 ## 1. About
-- This module is built to pursue identical configuration mount way between local development and remote deployment in kubernetes. 
+- This module is built to pursue identical configuration way between local development and remote deployment in kubernetes. 
 - This module exports a single function to create an JavaScript Object (or any type).
 - The function works in synchronous way by mimicking RPC call for asynchronous HTTP requests. It is a bad practice, but this is for the synchronous configuration loading at bootstrap.
 - How it works:
@@ -83,4 +88,9 @@ npm test
 ### Mocking K8S pod environment
 ```
 sudo sh -c "mkdir -p /var/run/secrets/kubernetes.io/serviceaccount/ && kubectl get -n default secret $(kubectl get sa default -n default -o jsonpath='{.secrets[0].name}') -o json | jq '.data.token' -r | base64 -D > /var/run/secrets/kubernetes.io/serviceaccount/token"
+```
+
+### Update coverage badge
+```
+npm run test:badge
 ```
