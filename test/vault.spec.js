@@ -17,9 +17,9 @@ describe("test vault.async function", () => {
 
     it("should be failed to create configuration for invalid item (with local token)", () => {
         expect(
-            vault.async(async read => {
+            vault.async(async get => {
                 return {
-                    a: (await read("common/data/test-invalid-path")).data.hello,
+                    a: (await get("common/data/test-invalid-path")).data.hello,
                     b: 2,
                     c: 3,
                 }
@@ -33,9 +33,11 @@ describe("test vault.async function", () => {
 
     it("should create configuration asynchronously (with local token)", () => {
         return expect(
-            vault.async(async read => {
+            vault.async(async (get, list) => {
+                await list("common/metadata");
+
                 return {
-                    a: (await read("common/data/test")).data.hello,
+                    a: (await get("common/data/test")).data.hello,
                     b: 2,
                     c: 3,
                 }
@@ -53,10 +55,10 @@ describe("test vault.async function", () => {
 
     it("should create configuration asynchronously (with k8s sa token)", () => {
         return expect(
-            vault.async(async read => {
+            vault.async(async get => {
                 return {
-                    a: (await read("common/data/test")).data.hello,
-                    b: (await read("common/data/test")).data.hello,
+                    a: (await get("common/data/test")).data.hello,
+                    b: (await get("common/data/test")).data.hello,
                     c: 3,
                 }
             }, {
@@ -75,9 +77,9 @@ describe("test vault.async function", () => {
 
     it("should be failed to create configuration without any token", () => {
         expect(
-            vault.async(async read => {
+            vault.async(async get => {
                 return {
-                    a: (await read("common/data/test")).data.hello,
+                    a: (await get("common/data/test")).data.hello,
                     b: 2,
                     c: 3,
                 }
@@ -101,9 +103,9 @@ describe("test vault function", () => {
 
     it("should create configuration synchronously (with local token)", () => {
         return expect(
-            vault(async read => {
+            vault(async get => {
                 return {
-                    a: (await read("common/data/test")).data.hello,
+                    a: (await get("common/data/test")).data.hello,
                     b: 2,
                     c: 3,
                 }
@@ -120,10 +122,10 @@ describe("test vault function", () => {
 
     it("should create configuration synchronously (with k8s sa token)", () => {
         return expect(
-            vault(async read => {
+            vault(async get => {
                 return {
-                    a: (await read("common/data/test")).data.hello,
-                    b: (await read("common/data/test")).data.hello,
+                    a: (await get("common/data/test")).data.hello,
+                    b: (await get("common/data/test")).data.hello,
                     c: 3,
                 }
             }, {
@@ -141,9 +143,9 @@ describe("test vault function", () => {
 
     it("should be failed to create configuration for invalid item (with local token)", () => {
         expect(() => {
-            vault(async read => {
+            vault(async get => {
                 return {
-                    a: (await read("common/data/test-invalid-path")).data.hello,
+                    a: (await get("common/data/test-invalid-path")).data.hello,
                     b: 2,
                     c: 3,
                 }
@@ -156,9 +158,9 @@ describe("test vault function", () => {
 
     it("should be failed to create configuration without any token", () => {
         expect(() => {
-            vault(async read => {
+            vault(async get => {
                 return {
-                    a: (await read("common/data/test")).data.hello,
+                    a: (await get("common/data/test")).data.hello,
                     b: 2,
                     c: 3,
                 }

@@ -10,7 +10,7 @@ async function makeAsync(factory, opts) {// for jest bug
     else if (typeof opts != "object") throw new Error("Second argument should be a object for Vault connection option");
 
     const reader = new VaultReader(opts);
-    return await reader.readWithFactory(factory);
+    return await reader.generateWithFactory(factory);
 }
 
 class VaultReader {
@@ -57,18 +57,18 @@ class VaultReader {
         this.token = vaultToken;
     }
 
-    async readWithFactory(factory) {
-        return await factory(this.read.bind(this));
+    async generateWithFactory(factory) {
+        return await factory(this.read.bind(this), this.list.bind(this));
     }
 
-    async read(itemPath) {
+    async call(itemPath, method) {
         const { uri } = this.opts;
         const itemURI = `${uri}/v1/${itemPath}`;
 
         await this.getToken(); // lazy login
 
         return fetch(itemURI, {
-            method: "GET",
+            method,
             headers: { "X-Vault-Token": this.token },
         })
             .then(async res => {
@@ -79,6 +79,14 @@ class VaultReader {
                 }
                 return result.data;
             });
+    }
+
+    async read(itemPath) {
+        return this.call(itemPath, "GET");
+    }
+
+    async list(itemPath) {
+        return this.call(itemPath, "LIST");
     }
 }
 

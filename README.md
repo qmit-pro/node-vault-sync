@@ -37,11 +37,12 @@ $ npm i --save qmit-pro/node-vault-sync
 ```js
 const vault = require("node-vault-sync");
 
-module.exports = vault(async read => {
+module.exports = vault(async (get, list) => {
     return {
-        app: (await read("secret/data/test")).data.hello,
+        app: (await get("secret/data/test")).data.hello,
+        keys: (await list("secret/metadata")).keys,
         foo: {
-            db: (await read("database/mysql/test")),
+            db: (await get("database/mysql/test")),
             foo: "other-property",
             bar: [1,2,3],
         },
@@ -70,7 +71,7 @@ console.log(config);
 const vault = require("node-vault-sync");
 
 // rather do asynchronously
-vault.async(async read => { ... }, { ... })
+vault.async(async get => { ... }, { ... })
     .then(config => {
         console.log(config);
     })
