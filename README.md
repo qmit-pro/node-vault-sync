@@ -78,6 +78,74 @@ vault.async(async get => { ... }, { ... })
     })
 ```
 
+#### ./production-example1.js
+```js
+const vault = require("node-vault-sync");
+
+/*
+ * Read mandatory environment variables
+ */
+process.env.APP_K8S_CLUSTER = process.env.APP_K8S_CLUSTER || "dev"; // dev, dev-2, prod, prod-2. prod-asia-northeast-1a-2, ... GKE cluster name
+process.env.APP_ENV = process.env.APP_ENV || "dev"; // dev, stage, prod, ... app provision envrionment
+
+module.exports = vault(async get => {
+    const webhooks = await get("common/data/webhooks").then(res => res.data);
+    return {
+        webhooks,
+        APP_ENV: process.env.APP_ENV,
+    };
+}, {
+    // vault connection setting
+    uri: "https://vault.internal.qmit.pro",
+    debug: false,
+
+    // alternative auth method for kubernetes pod
+    method: `k8s/${process.env.APP_K8S_CLUSTER}`,
+    role: "default",
+});
+```
+
+#### ./production-example2.js
+```js
+const vault = require("node-vault-sync");
+
+/*
+ * Read mandatory environment variables
+ */
+process.env.APP_K8S_CLUSTER = process.env.APP_K8S_CLUSTER || "dev"; // dev, dev-2, prod, prod-2. prod-asia-northeast-1a-2, ... GKE cluster name
+process.env.APP_ENV = process.env.APP_ENV || "dev"; // dev, stage, prod, ... app provision envrionment
+const { APP_ENV, APP_K8S_CLUSTER } = process.env;
+
+/*
+ * Read common credentials and metadata
+ */
+const config = vault(async (get, list) => {
+	const [
+		stackdriverCredentials,
+		services,
+		serviceKeysWithCredentials,
+	] = await Promise.all([
+		get("common/data/gcp-stackdriver-service-account").then(res => res.data),
+		get("common/data/services").then(res => res.data),
+		list("common/metadata/services/credentials").then(res => res.keys),
+	]);
+	return {
+		stackdriverCredentials,
+		services,
+		serviceKeysWithCredentials,
+		serviceKeys: services.groups.reduce((names, g) => names.concat(g.items.map(i => i.key)), []),
+	};
+}, {
+	// vault connection setting
+	uri: "https://vault.internal.qmit.pro",
+	debug: false,
+
+	// alternative auth method for kubernetes pod
+	method: `k8s/${APP_K8S_CLUSTER}`,
+	role: "default",
+});
+```
+
 
 ## Development
 ### 1. Test
