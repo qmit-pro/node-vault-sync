@@ -6,8 +6,9 @@ Generate configuration object ***synchronously*** from HashiCorp Vault by automa
 ![coverage-statements](./coverage/badge-statements.svg)
 ![coverage-functions](./coverage/badge-functions.svg)
 ![coverage-branches](./coverage/badge-branches.svg)
+[![NPM version](https://img.shields.io/npm/v/node-vault-sync.svg)](https://www.npmjs.com/package/node-vault-sync)
 
-## 1. About
+## Features
 - This module is built to pursue identical configuration way between local development and remote deployment in kubernetes. 
 - This module exports a single function to create an JavaScript Object (or any type).
 - The function works in synchronous way by mimicking RPC call for asynchronous HTTP requests. It is a bad practice, but this is for the synchronous configuration loading at bootstrap.
@@ -19,20 +20,20 @@ Generate configuration object ***synchronously*** from HashiCorp Vault by automa
 - Requirements:
     - vault server with kubernetes auth method enabled.
 
-## 2. Usage
-#### Install
+## Usage
+### 1. Install
 
-##### npm
+#### NPM
 ```bash
 $ npm i --save node-vault-sync
 ```
 
-##### nightly build
+#### Nightly Build
 ```bash
 $ npm i --save qmit-pro/node-vault-sync
 ```
 
-
+### 2. Examples
 #### ./sync-config.js
 ```js
 const vault = require("node-vault-sync");
@@ -78,20 +79,20 @@ vault.async(async get => { ... }, { ... })
 ```
 
 
-## 3. Development
-### Test
+## Development
+### 1. Test
 Currently it dose not provide mocking environment for Vault and Kubernetes.
 Configure your vault environment and use telepresence for k8s to test.
 ```
 npm test
 ```
 
-### Mocking K8S pod environment
+### 2. Mocking K8S pod environment
 ```
 sudo sh -c "mkdir -p /var/run/secrets/kubernetes.io/serviceaccount/ && kubectl get -n default secret $(kubectl get sa default -n default -o jsonpath='{.secrets[0].name}') -o json | jq '.data.token' -r | base64 -D > /var/run/secrets/kubernetes.io/serviceaccount/token"
 ```
 
-### Update coverage badge
+### 3. Update coverage badge
 ```
 npm run test:badge
 ```
