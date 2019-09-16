@@ -161,3 +161,8 @@ sudo sh -c "mkdir -p /var/run/secrets/kubernetes.io/serviceaccount/ && kubectl g
 ```
 npm run test:badge
 ```
+
+### 4. Publish
+- Update pcakage.json version
+- Tag HEAD commit as same version name
+- `npm publish`
