@@ -2,10 +2,11 @@ import fs from "fs";
 import path from "path";
 import fetch from "node-fetch";
 
-const VAULT_TOKEN_PATH = path.join(process.env.HOME || ".", ".vault-token");
+// @ts-ignore
+const VAULT_TOKEN_PATH = path.join(process.env.HOME, ".vault-token");
 const K8S_SA_TOKEN_PATH = "/var/run/secrets/kubernetes.io/serviceaccount/token";
 
-export default async function vaultAsync(factory: VaultReaderFactory, opts: VaultReaderOptions) {// for jest bug
+export default async function vaultAsync<T = any>(factory: VaultReaderFactory<T>, opts: VaultReaderOptions): Promise<T> {
     // validate arguments
     if (typeof factory != "function") throw new Error("First argument should be a factory function which returns configuration value");
     else if (typeof opts != "object") throw new Error("Second argument should be a object for Vault connection option");
@@ -23,7 +24,7 @@ export type VaultReaderOptions = {
     ignoreK8sSAToken?: boolean
 };
 
-export type VaultReaderFactory = (get: (itemPath: string) => Promise<any>, list: (itemPath: string) => Promise<any>) => void;
+export type VaultReaderFactory<T = any> = (get: (itemPath: string) => Promise<any>, list: (itemPath: string) => Promise<any>) => Promise<T>;
 
 class VaultReader {
     private opts: VaultReaderOptions;
@@ -82,11 +83,12 @@ class VaultReader {
 
         await this.getToken(); // lazy login
 
+        // @ts-ignore
         return fetch(itemURI, {
             method,
-            headers: { "X-Vault-Token": this.token || "" },
+            headers: { "X-Vault-Token": this.token },
         })
-            .then(async res => {
+            .then(async (res: any) => {
                 const result = await res.json();
                 if (res.status >= 400) {
                     const err = new Error(res.status + " Failed to fetch: " + itemURI);
