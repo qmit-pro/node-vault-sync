@@ -28,11 +28,6 @@ Generate configuration object ***synchronously*** from HashiCorp Vault by automa
 $ npm i --save node-vault-sync
 ```
 
-#### Nightly Build
-```bash
-$ npm i --save qmit-pro/node-vault-sync
-```
-
 ### 2. Examples
 #### ./sync-config.js
 ```js
@@ -146,6 +141,8 @@ const config = vault(async (get, list) => {
 });
 ```
 
+## TypeScript Support
+Done
 
 ## Development
 ### 1. Test

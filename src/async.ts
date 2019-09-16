@@ -1,10 +1,11 @@
-const fs = require("fs");
-const path = require("path");
-const fetch = require("node-fetch");
-const VAULT_TOKEN_PATH = path.join(process.env.HOME, ".vault-token");
+import fs from "fs";
+import path from "path";
+import fetch from "node-fetch";
+
+const VAULT_TOKEN_PATH = path.join(process.env.HOME || ".", ".vault-token");
 const K8S_SA_TOKEN_PATH = "/var/run/secrets/kubernetes.io/serviceaccount/token";
 
-async function makeAsync(factory, opts) {// for jest bug
+export default async function vaultAsync(factory: VaultReaderFactory, opts: VaultReaderOptions) {// for jest bug
     // validate arguments
     if (typeof factory != "function") throw new Error("First argument should be a factory function which returns configuration value");
     else if (typeof opts != "object") throw new Error("Second argument should be a object for Vault connection option");
@@ -13,8 +14,22 @@ async function makeAsync(factory, opts) {// for jest bug
     return await reader.generateWithFactory(factory);
 }
 
+export type VaultReaderOptions = {
+    uri: string
+    method: string
+    role: string
+    debug?: boolean
+    ignoreLocalToken?: boolean
+    ignoreK8sSAToken?: boolean
+};
+
+export type VaultReaderFactory = (get: (itemPath: string) => Promise<any>, list: (itemPath: string) => Promise<any>) => void;
+
 class VaultReader {
-    constructor(opts) {
+    private opts: VaultReaderOptions;
+    private token: string | null;
+
+    constructor(opts: VaultReaderOptions) {
         this.opts = {
             uri: "https://server.vault.svc.cluster.local",
             method: "kubernetes",
@@ -57,11 +72,11 @@ class VaultReader {
         this.token = vaultToken;
     }
 
-    async generateWithFactory(factory) {
-        return await factory(this.read.bind(this), this.list.bind(this));
+    async generateWithFactory(factory: VaultReaderFactory) {
+        return factory(this.read.bind(this), this.list.bind(this));
     }
 
-    async call(itemPath, method) {
+    async call(itemPath: string, method: string) {
         const { uri } = this.opts;
         const itemURI = `${uri}/v1/${itemPath}`;
 
@@ -69,7 +84,7 @@ class VaultReader {
 
         return fetch(itemURI, {
             method,
-            headers: { "X-Vault-Token": this.token },
+            headers: { "X-Vault-Token": this.token || "" },
         })
             .then(async res => {
                 const result = await res.json();
@@ -81,13 +96,11 @@ class VaultReader {
             });
     }
 
-    async read(itemPath) {
+    async read(itemPath: string) {
         return this.call(itemPath, "GET");
     }
 
-    async list(itemPath) {
+    async list(itemPath: string) {
         return this.call(itemPath, "LIST");
     }
 }
-
-module.exports = makeAsync;

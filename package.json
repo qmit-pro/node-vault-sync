@@ -1,16 +1,18 @@
 {
   "name": "node-vault-sync",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "Generate configuration object from HashiCorp Vault by automatic authenticating with local token or kubernetes service account in pod environment.",
-  "main": "index.js",
-  "scripts": {
-    "test": "jest ./test --detectOpenHandles --coverage",
-    "test:badge": "npm test && jest-coverage-badges"
-  },
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "files": [
-    "src",
-    "index.js"
+    "dist"
   ],
+  "scripts": {
+    "test": "tsc && jest --detectOpenHandles --coverage",
+    "test:badge": "npm test && jest-coverage-badges",
+    "lint": "tslint -p tsconfig.json",
+    "deps": "npm-check -u"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/qmit-pro/node-vault-sync.git"
@@ -26,14 +28,33 @@
     "sync-rpc": "^1.3.6"
   },
   "devDependencies": {
+    "@types/jest": "^24.0.18",
+    "@types/node": "^12.7.5",
+    "@types/node-fetch": "^2.5.0",
     "jest": "^24.9.0",
-    "jest-coverage-badges": "^1.1.2"
+    "jest-coverage-badges": "^1.1.2",
+    "ts-jest": "^24.1.0",
+    "tslint": "^5.20.0",
+    "typescript": "^3.6.3"
   },
   "jest": {
-    "coverageReporters": [
-      "json-summary",
-      "text",
-      "lcov"
-    ]
+    "coverageDirectory": "<rootDir>/coverage",
+    "testEnvironment": "node",
+    "moduleFileExtensions": [
+      "ts",
+      "tsx",
+      "js"
+    ],
+    "transform": {
+      "^.+\\.(ts|tsx)$": "ts-jest"
+    },
+    "testMatch": [
+      "**/*.spec.(ts|js)"
+    ],
+    "globals": {
+      "ts-jest": {
+        "tsConfig": "tsconfig.json"
+      }
+    }
   }
 }

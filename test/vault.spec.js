@@ -1,4 +1,4 @@
-const vault = require("../src");
+const vault = require("../dist");
 
 const opts = {
     uri: "https://vault.internal.qmit.pro",
@@ -6,7 +6,6 @@ const opts = {
     role: "default",
     debug: true,
 };
-
 
 describe("test vault.async function", () => {
     it("should throw for invalid args", () => {
@@ -97,7 +96,9 @@ describe("test vault.async function", () => {
 
 describe("test vault function", () => {
     it("should throw for invalid args", () => {
+        // @ts-ignore
         expect(() => vault("here should be factory")).toThrow();
+        // @ts-ignore
         expect(() => vault(() => {}, "here should be object")).toThrow();
     });
 
