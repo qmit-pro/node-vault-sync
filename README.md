@@ -142,7 +142,7 @@ const config = vault(async (get, list) => {
 ```
 
 ## TypeScript Support
-Done
+Supported from ES6: async/await poly-filled.
 
 ## Development
 ### 1. Test

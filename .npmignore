@@ -1,0 +1,6 @@
+.git*
+src
+test
+coverage
+node_modules
+tsconfig.json
