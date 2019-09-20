@@ -26,6 +26,15 @@ export type VaultReaderOptions = {
 
 export type VaultReaderFactory<T = any> = (get: (itemPath: string) => Promise<any>, list: (itemPath: string) => Promise<any>) => Promise<T>;
 
+
+class VaultError extends Error {
+    private statusCode: number;
+    constructor(props: any, statusCode: number) {
+        super(props);
+        this.statusCode = statusCode;
+    }
+}
+
 class VaultReader {
     private opts: VaultReaderOptions;
     private token: string | null;
@@ -67,7 +76,7 @@ class VaultReader {
 
             debug && console.log("issued vault token with k8s sa token:", vaultToken);
         } else {
-            throw new Error("Failed to read both vault token and k8s service account token");
+            throw new VaultError("Failed to read both vault token and k8s service account token", 401);
         }
 
         this.token = vaultToken;
@@ -91,7 +100,7 @@ class VaultReader {
             .then(async (res: any) => {
                 const result = await res.json();
                 if (res.status >= 400) {
-                    const err = new Error(res.status + " Failed to fetch: " + itemURI);
+                    const err = new VaultError("Failed to fetch: " + itemURI, res.status);
                     throw Object.assign(err, result);
                 }
                 return result.data;

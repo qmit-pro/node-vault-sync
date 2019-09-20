@@ -152,14 +152,14 @@ Configure your vault environment and use telepresence for k8s to test.
 npm test
 ```
 
-### 2. Mocking K8S pod environment
-```
-sudo sh -c "mkdir -p /var/run/secrets/kubernetes.io/serviceaccount/ && kubectl get -n default secret $(kubectl get sa default -n default -o jsonpath='{.secrets[0].name}') -o json | jq '.data.token' -r | base64 -D > /var/run/secrets/kubernetes.io/serviceaccount/token"
-```
-
-### 3. Update coverage badge
+### 2. Test and update coverage badge
 ```
 npm run test:badge
+```
+
+### 3. Mocking K8S pod environment
+```
+sudo sh -c "mkdir -p /var/run/secrets/kubernetes.io/serviceaccount/ && kubectl get -n default secret $(kubectl get sa default -n default -o jsonpath='{.secrets[0].name}') -o json | jq '.data.token' -r | base64 -D > /var/run/secrets/kubernetes.io/serviceaccount/token"
 ```
 
 ### 4. Publish
