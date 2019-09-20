@@ -28,10 +28,10 @@ export type VaultReaderFactory<T = any> = (get: (itemPath: string) => Promise<an
 
 
 class VaultError extends Error {
-    private statusCode: number;
-    constructor(props: any, statusCode: number) {
+    private code: number;
+    constructor(props: any, code: number) {
         super(props);
-        this.statusCode = statusCode;
+        this.code = code;
     }
 }
 

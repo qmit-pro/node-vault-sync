@@ -1,6 +1,6 @@
 {
   "name": "node-vault-sync",
-  "version": "1.1.5",
+  "version": "1.1.6",
   "description": "Generate configuration object from HashiCorp Vault by automatic authenticating with local token or kubernetes service account in pod environment.",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
