@@ -1,5 +1,5 @@
 TN:
-SF:/Users/dw.kim/Synced/qmit/node-vault-sync/dist/async.js
+SF:/Users/dw.kim/Synced/qmit/vault-sync/dist/async.js
 FN:10,vaultAsync
 FN:11,(anonymous_1)
 FN:23,(anonymous_2)
@@ -119,7 +119,7 @@ BRF:22
 BRH:22
 end_of_record
 TN:
-SF:/Users/dw.kim/Synced/qmit/node-vault-sync/dist/index.js
+SF:/Users/dw.kim/Synced/qmit/vault-sync/dist/index.js
 FNF:0
 FNH:0
 DA:2,1
@@ -134,7 +134,7 @@ BRF:0
 BRH:0
 end_of_record
 TN:
-SF:/Users/dw.kim/Synced/qmit/node-vault-sync/dist/sync.js
+SF:/Users/dw.kim/Synced/qmit/vault-sync/dist/sync.js
 FN:5,vaultSync
 FNF:1
 FNH:1

@@ -1,4 +1,4 @@
-# node-vault-sync
+# vault-sync
 
 Generate configuration object ***synchronously*** from HashiCorp Vault by automatic authenticating with ***locally cached token*** or ***kubernetes*** service account in pod environment.
 
@@ -6,7 +6,7 @@ Generate configuration object ***synchronously*** from HashiCorp Vault by automa
 ![coverage-statements](./coverage/badge-statements.svg)
 ![coverage-functions](./coverage/badge-functions.svg)
 ![coverage-branches](./coverage/badge-branches.svg)
-[![NPM version](https://img.shields.io/npm/v/node-vault-sync.svg)](https://www.npmjs.com/package/node-vault-sync)
+[![NPM version](https://img.shields.io/npm/v/vault-sync.svg)](https://www.npmjs.com/package/vault-sync)
 
 ## Features
 - This module is built to pursue identical configuration way between local development and remote deployment in kubernetes. 
@@ -25,13 +25,13 @@ Generate configuration object ***synchronously*** from HashiCorp Vault by automa
 
 #### NPM
 ```bash
-$ npm i --save node-vault-sync
+$ npm i --save vault-sync
 ```
 
 ### 2. Examples
 #### ./sync-config.js
 ```js
-const vault = require("node-vault-sync");
+const vault = require("vault-sync");
 
 module.exports = vault(async (get, list) => {
     return {
@@ -64,7 +64,7 @@ console.log(config);
 
 #### ./async-config-example.js
 ```js
-const vault = require("node-vault-sync");
+const vault = require("vault-sync");
 
 // rather do asynchronously
 vault.async(async get => { ... }, { ... })
@@ -75,7 +75,7 @@ vault.async(async get => { ... }, { ... })
 
 #### ./production-example1.js
 ```js
-const vault = require("node-vault-sync");
+const vault = require("vault-sync");
 
 /*
  * Read mandatory environment variables
@@ -102,7 +102,7 @@ module.exports = vault(async get => {
 
 #### ./production-example2.js
 ```js
-const vault = require("node-vault-sync");
+const vault = require("vault-sync");
 
 /*
  * Read mandatory environment variables
