@@ -6,7 +6,7 @@ import fetch from "node-fetch";
 const VAULT_TOKEN_PATH = path.join(process.env.HOME, ".vault-token");
 const K8S_SA_TOKEN_PATH = "/var/run/secrets/kubernetes.io/serviceaccount/token";
 
-export default async function vaultAsync<T = any>(factory: VaultReaderFactory<T>, opts: VaultReaderOptions): Promise<T> {
+export default async function vaultAsync<T>(factory: VaultReaderFactory<T>, opts: VaultReaderOptions) {
     // validate arguments
     if (typeof factory != "function") throw new Error("First argument should be a factory function which returns configuration value");
     else if (typeof opts != "object") throw new Error("Second argument should be a object for Vault connection option");
@@ -82,7 +82,7 @@ class VaultReader {
         this.token = vaultToken;
     }
 
-    async generateWithFactory(factory: VaultReaderFactory) {
+    async generateWithFactory<T = any>(factory: VaultReaderFactory<T>) {
         return factory(this.read.bind(this), this.list.bind(this));
     }
 

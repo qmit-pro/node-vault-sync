@@ -3,7 +3,6 @@ import vaultSync from "./sync";
 
 type VaultReader = typeof vaultSync & { async: typeof vaultAsync };
 
-// @ts-ignore
-const vault: VaultReader = vaultSync;
+const vault: VaultReader = vaultSync as any;
 vault.async = vaultAsync;
 export = vault;

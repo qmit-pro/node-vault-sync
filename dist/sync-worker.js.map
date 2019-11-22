@@ -1,0 +1,1 @@
+{"version":3,"file":"sync-worker.js","sourceRoot":"","sources":["../src/sync-worker.ts"],"names":[],"mappings":";;;AAAA,4DAA6E;AAE7E,SAAwB,SAAS;IAC7B,OAAO,UAAU,CAAC,OAAO,EAAE,IAAI,CAA+B;QAC1D,OAAO,eAAU,CAAC,IAAI,CAAC,OAAO,CAAC,EAAE,IAAI,CAAC,CAAC;IAC3C,CAAC,CAAA;AACL,CAAC;AAJD,4BAIC"}
