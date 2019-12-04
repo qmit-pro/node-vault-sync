@@ -10,10 +10,12 @@ const K8S_SA_TOKEN_PATH = "/var/run/secrets/kubernetes.io/serviceaccount/token";
 function vaultAsync(factory, opts) {
     return tslib_1.__awaiter(this, void 0, void 0, function* () {
         // validate arguments
-        if (typeof factory != "function")
+        if (typeof factory != "function") {
             throw new Error("First argument should be a factory function which returns configuration value");
-        else if (typeof opts != "object")
+        }
+        else if (typeof opts != "object") {
             throw new Error("Second argument should be a object for Vault connection option");
+        }
         const reader = new VaultReader(opts);
         return yield reader.generateWithFactory(factory);
     });
@@ -32,8 +34,9 @@ class VaultReader {
     }
     getToken() {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
-            if (this.token)
+            if (this.token) {
                 return;
+            }
             const { uri, method, role, debug, ignoreLocalToken, ignoreK8sSAToken } = this.opts;
             let vaultToken = null;
             if (!ignoreLocalToken && fs_1.default.existsSync(VAULT_TOKEN_PATH)) {
@@ -41,15 +44,22 @@ class VaultReader {
                 debug && console.log("read local vault token:", vaultToken);
             }
             else if (!ignoreK8sSAToken && fs_1.default.existsSync(K8S_SA_TOKEN_PATH)) {
-                const k8sSAToken = fs_1.default.readFileSync(K8S_SA_TOKEN_PATH).toString();
-                debug && console.log("read k8s sa token:", k8sSAToken);
+                const jwt = fs_1.default.readFileSync(K8S_SA_TOKEN_PATH).toString();
+                debug && console.log("read k8s sa token:", jwt);
                 vaultToken = yield node_fetch_1.default(`${uri}/v1/auth/${method}/login`, {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ jwt: k8sSAToken, role, }),
+                    body: JSON.stringify({ jwt, role }),
                 })
                     .then(res => res.json())
-                    .then(req => req.auth.client_token);
+                    .then(res => {
+                    if (res.errors) {
+                        const error = new Error("invalid vault token: " + res.errors.join("\n"));
+                        throw error;
+                    }
+                    debug && console.log("vault auth response:", res);
+                    return res.auth.client_token;
+                });
                 debug && console.log("issued vault token with k8s sa token:", vaultToken);
             }
             else {

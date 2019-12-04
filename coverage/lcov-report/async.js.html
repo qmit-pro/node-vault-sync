@@ -20,14 +20,14 @@
     </h1>
     <div class='clearfix'>
       <div class='fl pad1y space-right2'>
-        <span class="strong">100% </span>
+        <span class="strong">96.49% </span>
         <span class="quiet">Statements</span>
-        <span class='fraction'>53/53</span>
+        <span class='fraction'>55/57</span>
       </div>
       <div class='fl pad1y space-right2'>
-        <span class="strong">100% </span>
+        <span class="strong">96.15% </span>
         <span class="quiet">Branches</span>
-        <span class='fraction'>22/22</span>
+        <span class='fraction'>25/26</span>
       </div>
       <div class='fl pad1y space-right2'>
         <span class="strong">100% </span>
@@ -35,9 +35,9 @@
         <span class='fraction'>18/18</span>
       </div>
       <div class='fl pad1y space-right2'>
-        <span class="strong">100% </span>
+        <span class="strong">96.49% </span>
         <span class="quiet">Lines</span>
-        <span class='fraction'>53/53</span>
+        <span class='fraction'>55/57</span>
       </div>
     </div>
     <p class="quiet">
@@ -142,7 +142,17 @@
 <a name='L94'></a><a href='#L94'>94</a>
 <a name='L95'></a><a href='#L95'>95</a>
 <a name='L96'></a><a href='#L96'>96</a>
-<a name='L97'></a><a href='#L97'>97</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+<a name='L97'></a><a href='#L97'>97</a>
+<a name='L98'></a><a href='#L98'>98</a>
+<a name='L99'></a><a href='#L99'>99</a>
+<a name='L100'></a><a href='#L100'>100</a>
+<a name='L101'></a><a href='#L101'>101</a>
+<a name='L102'></a><a href='#L102'>102</a>
+<a name='L103'></a><a href='#L103'>103</a>
+<a name='L104'></a><a href='#L104'>104</a>
+<a name='L105'></a><a href='#L105'>105</a>
+<a name='L106'></a><a href='#L106'>106</a>
+<a name='L107'></a><a href='#L107'>107</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
@@ -156,8 +166,10 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">7x</span>
 <span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">5x</span>
 <span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">4x</span>
 <span class="cline-any cline-yes">4x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -178,6 +190,7 @@
 <span class="cline-any cline-yes">6x</span>
 <span class="cline-any cline-yes">6x</span>
 <span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">4x</span>
 <span class="cline-any cline-yes">4x</span>
 <span class="cline-any cline-yes">4x</span>
@@ -193,7 +206,14 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -250,10 +270,12 @@ const K8S_SA_TOKEN_PATH = "/var/run/secrets/kubernetes.io/serviceaccount/token";
 function vaultAsync(factory, opts) {
     return tslib_1.__awaiter(this, void 0, void 0, function* () {
         // validate arguments
-        if (typeof factory != "function")
+        if (typeof factory != "function") {
             throw new Error("First argument should be a factory function which returns configuration value");
-        else if (typeof opts != "object")
+        }
+        else if (typeof opts != "object") {
             throw new Error("Second argument should be a object for Vault connection option");
+        }
         const reader = new VaultReader(opts);
         return yield reader.generateWithFactory(factory);
     });
@@ -272,8 +294,9 @@ class VaultReader {
     }
     getToken() {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
-            if (this.token)
+            if (this.token) {
                 return;
+            }
             const { uri, method, role, debug, ignoreLocalToken, ignoreK8sSAToken } = this.opts;
             let vaultToken = null;
             if (!ignoreLocalToken &amp;&amp; fs_1.default.existsSync(VAULT_TOKEN_PATH)) {
@@ -281,15 +304,22 @@ class VaultReader {
                 debug &amp;&amp; console.log("read local vault token:", vaultToken);
             }
             else if (!ignoreK8sSAToken &amp;&amp; fs_1.default.existsSync(K8S_SA_TOKEN_PATH)) {
-                const k8sSAToken = fs_1.default.readFileSync(K8S_SA_TOKEN_PATH).toString();
-                debug &amp;&amp; console.log("read k8s sa token:", k8sSAToken);
+                const jwt = fs_1.default.readFileSync(K8S_SA_TOKEN_PATH).toString();
+                debug &amp;&amp; console.log("read k8s sa token:", jwt);
                 vaultToken = yield node_fetch_1.default(`${uri}/v1/auth/${method}/login`, {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ jwt: k8sSAToken, role, }),
+                    body: JSON.stringify({ jwt, role }),
                 })
                     .then(res =&gt; res.json())
-                    .then(req =&gt; req.auth.client_token);
+                    .then(res =&gt; {
+                    <span class="missing-if-branch" title="if path not taken" >I</span>if (res.errors) {
+                        const error = <span class="cstat-no" title="statement not covered" >new Error("invalid vault token: " + res.errors.join("\n"));</span>
+<span class="cstat-no" title="statement not covered" >                        throw error;</span>
+                    }
+                    debug &amp;&amp; console.log("vault auth response:", res);
+                    return res.auth.client_token;
+                });
                 debug &amp;&amp; console.log("issued vault token with k8s sa token:", vaultToken);
             }
             else {
@@ -340,7 +370,7 @@ class VaultReader {
 </div><!-- /wrapper -->
 <div class='footer quiet pad2 space-top1 center small'>
   Code coverage
-  generated by <a href="https://istanbul.js.org/" target="_blank">istanbul</a> at Fri Nov 22 2019 19:08:13 GMT+0900 (Korean Standard Time)
+  generated by <a href="https://istanbul.js.org/" target="_blank">istanbul</a> at Wed Dec 04 2019 14:05:00 GMT+0900 (Korean Standard Time)
 </div>
 </div>
 <script src="prettify.js"></script>
