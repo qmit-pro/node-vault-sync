@@ -29,7 +29,7 @@ $ npm i --save vault-sync
 ```
 
 ### 2. Examples
-#### ./sync-config.js
+#### ./sync-config.ts
 ```js
 const vault = require("vault-sync");
 
@@ -149,12 +149,12 @@ Supported from ES6: async/await poly-filled.
 Currently it dose not provide mocking environment for Vault and Kubernetes.
 Configure your vault environment and use telepresence for k8s to test.
 ```
-npm test
+yarn test
 ```
 
 ### 2. Test and update coverage badge
 ```
-npm run test:badge
+yarn test:badge
 ```
 
 ### 3. Mocking K8S pod environment
@@ -163,6 +163,7 @@ sudo sh -c "mkdir -p /var/run/secrets/kubernetes.io/serviceaccount/ && kubectl g
 ```
 
 ### 4. Publish
-- Update pcakage.json version
-- Tag HEAD commit as same version name
-- `npm publish`
+```
+yarn build
+yarn publish
+```

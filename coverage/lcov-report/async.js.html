@@ -1,51 +1,62 @@
+
 <!doctype html>
 <html lang="en">
+
 <head>
     <title>Code coverage report for async.js</title>
     <meta charset="utf-8" />
     <link rel="stylesheet" href="prettify.css" />
     <link rel="stylesheet" href="base.css" />
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="shortcut icon" type="image/x-icon" href="favicon.png" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <style type='text/css'>
         .coverage-summary .sorter {
             background-image: url(sort-arrow-sprite.png);
         }
     </style>
 </head>
+    
 <body>
 <div class='wrapper'>
-  <div class='pad1'>
-    <h1>
-      <a href="index.html">All files</a> async.js
-    </h1>
-    <div class='clearfix'>
-      <div class='fl pad1y space-right2'>
-        <span class="strong">96.49% </span>
-        <span class="quiet">Statements</span>
-        <span class='fraction'>55/57</span>
-      </div>
-      <div class='fl pad1y space-right2'>
-        <span class="strong">96.15% </span>
-        <span class="quiet">Branches</span>
-        <span class='fraction'>25/26</span>
-      </div>
-      <div class='fl pad1y space-right2'>
-        <span class="strong">100% </span>
-        <span class="quiet">Functions</span>
-        <span class='fraction'>18/18</span>
-      </div>
-      <div class='fl pad1y space-right2'>
-        <span class="strong">96.49% </span>
-        <span class="quiet">Lines</span>
-        <span class='fraction'>55/57</span>
-      </div>
+    <div class='pad1'>
+        <h1><a href="index.html">All files</a> async.js</h1>
+        <div class='clearfix'>
+            
+            <div class='fl pad1y space-right2'>
+                <span class="strong">96.55% </span>
+                <span class="quiet">Statements</span>
+                <span class='fraction'>56/58</span>
+            </div>
+        
+            
+            <div class='fl pad1y space-right2'>
+                <span class="strong">92.86% </span>
+                <span class="quiet">Branches</span>
+                <span class='fraction'>26/28</span>
+            </div>
+        
+            
+            <div class='fl pad1y space-right2'>
+                <span class="strong">100% </span>
+                <span class="quiet">Functions</span>
+                <span class='fraction'>18/18</span>
+            </div>
+        
+            
+            <div class='fl pad1y space-right2'>
+                <span class="strong">96.55% </span>
+                <span class="quiet">Lines</span>
+                <span class='fraction'>56/58</span>
+            </div>
+        
+            
+        </div>
+        <p class="quiet">
+            Press <em>n</em> or <em>j</em> to go to the next uncovered block, <em>b</em>, <em>p</em> or <em>k</em> for the previous block.
+        </p>
     </div>
-    <p class="quiet">
-      Press <em>n</em> or <em>j</em> to go to the next uncovered block, <em>b</em>, <em>p</em> or <em>k</em> for the previous block.
-    </p>
-  </div>
-  <div class='status-line high'></div>
-<pre><table class="coverage">
+    <div class='status-line high'></div>
+    <pre><table class="coverage">
 <tr><td class="line-count quiet"><a name='L1'></a><a href='#L1'>1</a>
 <a name='L2'></a><a href='#L2'>2</a>
 <a name='L3'></a><a href='#L3'>3</a>
@@ -152,7 +163,15 @@
 <a name='L104'></a><a href='#L104'>104</a>
 <a name='L105'></a><a href='#L105'>105</a>
 <a name='L106'></a><a href='#L106'>106</a>
-<a name='L107'></a><a href='#L107'>107</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+<a name='L107'></a><a href='#L107'>107</a>
+<a name='L108'></a><a href='#L108'>108</a>
+<a name='L109'></a><a href='#L109'>109</a>
+<a name='L110'></a><a href='#L110'>110</a>
+<a name='L111'></a><a href='#L111'>111</a>
+<a name='L112'></a><a href='#L112'>112</a>
+<a name='L113'></a><a href='#L113'>113</a>
+<a name='L114'></a><a href='#L114'>114</a>
+<a name='L115'></a><a href='#L115'>115</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
@@ -179,6 +198,14 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">2x</span>
 <span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">4x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -289,7 +316,15 @@ class VaultError extends Error {
 }
 class VaultReader {
     constructor(opts) {
-        this.opts = Object.assign({ uri: "https://server.vault.svc.cluster.local", method: "kubernetes", role: "default", debug: false, ignoreLocalToken: false, ignoreK8sSAToken: false }, opts);
+        this.opts = {
+            uri: "https://server.vault.svc.cluster.local",
+            method: "kubernetes",
+            role: "default",
+            debug: false,
+            ignoreLocalToken: false,
+            ignoreK8sSAToken: false,
+        };
+        this.opts = Object.assign(Object.assign({}, this.opts), opts);
         this.token = null;
     }
     getToken() {
@@ -341,7 +376,7 @@ class VaultReader {
             // @ts-ignore
             return node_fetch_1.default(itemURI, {
                 method,
-                headers: { "X-Vault-Token": this.token },
+                headers: { "X-Vault-Token": this.token || <span class="branch-1 cbranch-no" title="branch not covered" >"" </span>},
             })
                 .then((res) =&gt; tslib_1.__awaiter(this, void 0, void 0, function* () {
                 const result = yield res.json();
@@ -364,24 +399,24 @@ class VaultReader {
         });
     }
 }
-//# sourceMappingURL=async.js.map</pre></td></tr>
-</table></pre>
-<div class='push'></div><!-- for sticky footer -->
-</div><!-- /wrapper -->
-<div class='footer quiet pad2 space-top1 center small'>
-  Code coverage
-  generated by <a href="https://istanbul.js.org/" target="_blank">istanbul</a> at Wed Dec 04 2019 14:05:00 GMT+0900 (Korean Standard Time)
-</div>
-</div>
-<script src="prettify.js"></script>
-<script>
-window.onload = function () {
-        if (typeof prettyPrint === 'function') {
-            prettyPrint();
-        }
-};
-</script>
-<script src="sorter.js"></script>
-<script src="block-navigation.js"></script>
-</body>
+//# sourceMappingURL=async.js.map</pre></td></tr></table></pre>
+
+                <div class='push'></div><!-- for sticky footer -->
+            </div><!-- /wrapper -->
+            <div class='footer quiet pad2 space-top1 center small'>
+                Code coverage generated by
+                <a href="https://istanbul.js.org/" target="_blank">istanbul</a>
+                at Tue May 19 2020 16:16:08 GMT+0900 (Korean Standard Time)
+            </div>
+        </div>
+        <script src="prettify.js"></script>
+        <script>
+            window.onload = function () {
+                prettyPrint();
+            };
+        </script>
+        <script src="sorter.js"></script>
+        <script src="block-navigation.js"></script>
+    </body>
 </html>
+    

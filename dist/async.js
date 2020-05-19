@@ -29,7 +29,15 @@ class VaultError extends Error {
 }
 class VaultReader {
     constructor(opts) {
-        this.opts = Object.assign({ uri: "https://server.vault.svc.cluster.local", method: "kubernetes", role: "default", debug: false, ignoreLocalToken: false, ignoreK8sSAToken: false }, opts);
+        this.opts = {
+            uri: "https://server.vault.svc.cluster.local",
+            method: "kubernetes",
+            role: "default",
+            debug: false,
+            ignoreLocalToken: false,
+            ignoreK8sSAToken: false,
+        };
+        this.opts = Object.assign(Object.assign({}, this.opts), opts);
         this.token = null;
     }
     getToken() {
@@ -81,7 +89,7 @@ class VaultReader {
             // @ts-ignore
             return node_fetch_1.default(itemURI, {
                 method,
-                headers: { "X-Vault-Token": this.token },
+                headers: { "X-Vault-Token": this.token || "" },
             })
                 .then((res) => tslib_1.__awaiter(this, void 0, void 0, function* () {
                 const result = yield res.json();

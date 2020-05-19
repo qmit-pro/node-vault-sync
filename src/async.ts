@@ -39,7 +39,7 @@ class VaultError extends Error {
 }
 
 class VaultReader {
-  private opts: VaultReaderOptions;
+  private readonly opts: VaultReaderOptions;
   private token: string | null;
 
   constructor(opts: VaultReaderOptions) {
@@ -50,8 +50,8 @@ class VaultReader {
       debug: false,
       ignoreLocalToken: false,
       ignoreK8sSAToken: false,
-      ...opts,
     };
+    this.opts = { ...this.opts, ...opts };
     this.token = null;
   }
 
@@ -107,7 +107,7 @@ class VaultReader {
     // @ts-ignore
     return fetch(itemURI, {
       method,
-      headers: {"X-Vault-Token": this.token},
+      headers: {"X-Vault-Token": this.token || "" },
     })
       .then(async (res: any) => {
         const result = await res.json();
