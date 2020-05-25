@@ -2,11 +2,10 @@ import fs from "fs";
 import path from "path";
 import fetch from "node-fetch";
 
-// @ts-ignore
-const VAULT_TOKEN_PATH = path.join(process.env.HOME, ".vault-token");
-const K8S_SA_TOKEN_PATH = "/var/run/secrets/kubernetes.io/serviceaccount/token";
+export const VAULT_TOKEN_PATH = path.join(process.env.HOME!, ".vault-token");
+export const K8S_SA_TOKEN_PATH = "/var/run/secrets/kubernetes.io/serviceaccount/token";
 
-export default async function vaultAsync<T>(factory: VaultReaderFactory<T>, opts: VaultReaderOptions) {
+export default function vaultAsync<T, S>(factory: VaultReaderFactory<T, S>, opts: VaultReaderOptions<S>): Promise<T> {
   // validate arguments
   if (typeof factory != "function") {
     throw new Error("First argument should be a factory function which returns configuration value");
@@ -14,22 +13,23 @@ export default async function vaultAsync<T>(factory: VaultReaderFactory<T>, opts
     throw new Error("Second argument should be a object for Vault connection option");
   }
 
-  const reader = new VaultReader(opts);
-  return await reader.generateWithFactory(factory);
+  const reader = new VaultReader<S>(opts);
+  return reader.generateWithFactory(factory);
 }
 
-export type VaultReaderOptions = {
+export type VaultReaderOptions<S extends {[key: string]: any} | undefined = undefined> = {
   uri: string
   method: string
   role: string
   debug?: boolean
   ignoreLocalToken?: boolean
   ignoreK8sSAToken?: boolean
+  sandbox?: S;
 };
 
-export type VaultReaderFactory<T = any> = (get: (itemPath: string) => Promise<any>, list: (itemPath: string) => Promise<any>) => Promise<T>;
+export type VaultReaderFactory<T = any, S = any> = (get: (itemPath: string) => Promise<any>, list: (itemPath: string) => Promise<any>, sandbox?: S) => Promise<T>;
 
-class VaultError extends Error {
+export class VaultError extends Error {
   private code: number;
 
   constructor(props: any, code: number) {
@@ -38,11 +38,11 @@ class VaultError extends Error {
   }
 }
 
-class VaultReader {
-  private readonly opts: VaultReaderOptions;
+export class VaultReader<S> {
+  private readonly opts: VaultReaderOptions<S>;
   private token: string | null;
 
-  constructor(opts: VaultReaderOptions) {
+  constructor(opts: VaultReaderOptions<S>) {
     this.opts = {
       uri: "https://server.vault.svc.cluster.local",
       method: "kubernetes",
@@ -61,7 +61,7 @@ class VaultReader {
     }
 
     const {uri, method, role, debug, ignoreLocalToken, ignoreK8sSAToken} = this.opts;
-    let vaultToken = null;
+    let vaultToken: string;
 
     if (!ignoreLocalToken && fs.existsSync(VAULT_TOKEN_PATH)) {
       vaultToken = fs.readFileSync(VAULT_TOKEN_PATH).toString();
@@ -91,11 +91,11 @@ class VaultReader {
       throw new VaultError("Failed to read both vault token and k8s service account token", 401);
     }
 
-    this.token = vaultToken;
+    this.token = vaultToken || null;
   }
 
-  async generateWithFactory<T = any>(factory: VaultReaderFactory<T>) {
-    return factory(this.read.bind(this), this.list.bind(this));
+  async generateWithFactory<T = any>(factory: VaultReaderFactory<T, S>) {
+    return factory(this.read.bind(this), this.list.bind(this), this.opts.sandbox);
   }
 
   async call(itemPath: string, method: string) {

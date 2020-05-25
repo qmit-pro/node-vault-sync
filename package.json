@@ -1,6 +1,6 @@
 {
   "name": "vault-sync",
-  "version": "1.1.10",
+  "version": "2.0.0",
   "description": "Generate configuration object from HashiCorp Vault by automatic authenticating with local token or kubernetes service account in pod environment.",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -9,10 +9,11 @@
   ],
   "scripts": {
     "build": "tsc --importHelpers",
-    "test": "npm run build && jest --detectOpenHandles --coverage",
-    "test:badge": "npm test && jest-coverage-badges",
+    "mock": "sudo sh -c \"mkdir -p /var/run/secrets/kubernetes.io/serviceaccount/ && kubectl get -n default secret $(kubectl get sa default -n default -o jsonpath='{.secrets[0].name}') -o json | jq '.data.token' -r | base64 -D > /var/run/secrets/kubernetes.io/serviceaccount/token\"",
+    "test": "yarn run build &&  jest --detectOpenHandles --coverage",
+    "test:badge": "yarn test -ci && jest-coverage-badges",
     "lint": "tslint -p tsconfig.json",
-    "deps": "npm-check -u"
+    "deps": "yarn-check -u"
   },
   "repository": {
     "type": "git",
@@ -35,17 +36,16 @@
     "@types/node-fetch": "^2.5.0",
     "jest": "^26.0.1",
     "jest-coverage-badges": "^1.1.2",
-    "npm-check": "^5.9.0",
     "ts-jest": "^26.0.0",
     "tslint": "^6.1.2",
-    "typescript": "^3.6.3"
+    "typescript": "^3.6.3",
+    "yarn-check": "^0.0.3"
   },
   "jest": {
     "coverageDirectory": "<rootDir>/coverage",
     "testEnvironment": "node",
     "moduleFileExtensions": [
       "ts",
-      "tsx",
       "js"
     ],
     "transform": {

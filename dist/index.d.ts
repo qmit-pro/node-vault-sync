@@ -1,7 +1,8 @@
 import vaultAsync from "./async";
 import vaultSync from "./sync";
-declare type VaultReader = typeof vaultSync & {
+export declare type VaultReader = typeof vaultSync & {
     async: typeof vaultAsync;
 };
 declare const vault: VaultReader;
-export = vault;
+export { vault };
+export default vault;

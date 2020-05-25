@@ -1,4 +1,4 @@
-const vault = require("../dist");
+const vault = require("../dist").default;
 
 const opts = {
     uri: "https://vault.internal.qmit.pro",
@@ -8,23 +8,14 @@ const opts = {
 };
 
 describe("test vault.async function", () => {
-    it("should throw for invalid args", () => {
-        // @ts-ignore
-        expect(vault.async()).rejects.toThrow();
-        // @ts-ignore
-        expect(vault.async("here should be factory")).rejects.toThrow();
-        // @ts-ignore
-        expect(vault.async(() => {}, "here should be object")).rejects.toThrow();
-    });
-
     it("should be failed to create configuration for invalid item (with local token)", () => {
         expect(
-            vault.async(async (get: any) => {
+            vault.async(async (get, list, sand) => {
                 return {
                     a: (await get("common/data/test-invalid-path")).data.hello,
                     b: 2,
                     c: 3,
-                }
+                };
             }, {
                 ...opts,
             })
@@ -35,14 +26,14 @@ describe("test vault.async function", () => {
 
     it("should create configuration asynchronously (with local token)", () => {
         return expect(
-            vault.async(async (get: any, list: any) => {
+            vault.async(async (get, list) => {
                 await list("common/metadata");
 
                 return {
                     a: (await get("common/data/test")).data.hello,
                     b: 2,
                     c: 3,
-                }
+                };
             }, {
                 ...opts,
             })
@@ -57,7 +48,7 @@ describe("test vault.async function", () => {
 
     it("should create configuration asynchronously (with k8s sa token)", () => {
         return expect(
-            vault.async(async (get: any) => {
+            vault.async(async (get) => {
                 return {
                     a: (await get("common/data/test")).data.hello,
                     b: (await get("common/data/test")).data.hello,
@@ -79,7 +70,7 @@ describe("test vault.async function", () => {
 
     it("should be failed to create configuration without any token", () => {
         expect(
-            vault.async(async (get: any) => {
+            vault.async(async (get) => {
                 return {
                     a: (await get("common/data/test")).data.hello,
                     b: 2,
@@ -107,7 +98,7 @@ describe("test vault function", () => {
 
     it("should create configuration synchronously (with local token)", () => {
         return expect(
-            vault(async (get: any) => {
+            vault(async (get) => {
                 return {
                     a: (await get("common/data/test")).data.hello,
                     b: 2,
@@ -126,7 +117,7 @@ describe("test vault function", () => {
 
     it("should create configuration synchronously (with k8s sa token)", () => {
         return expect(
-            vault(async (get: any) => {
+            vault(async (get) => {
                 return {
                     a: (await get("common/data/test")).data.hello,
                     b: (await get("common/data/test")).data.hello,
@@ -147,7 +138,7 @@ describe("test vault function", () => {
 
     it("should be failed to create configuration for invalid item (with local token)", () => {
         expect(() => {
-            vault(async (get: any) => {
+            vault(async (get) => {
                 return {
                     a: (await get("common/data/test-invalid-path")).data.hello,
                     b: 2,
@@ -162,7 +153,7 @@ describe("test vault function", () => {
 
     it("should be failed to create configuration without any token", () => {
         expect(() => {
-            vault(async (get: any) => {
+            vault(async (get) => {
                 return {
                     a: (await get("common/data/test")).data.hello,
                     b: 2,
@@ -178,3 +169,27 @@ describe("test vault function", () => {
     });
 });
 
+describe("test vault sandbox option", () => {
+    it("should create configuration synchronously (with sandbox variables injection)", () => {
+        const result = vault(async (get, list, { variable }) => {
+            return {
+                a: (await get(`common/data/${variable}`)).data.hello,
+                b: 2,
+                c: 3,
+            }
+        }, {
+            ...opts,
+            sandbox: {
+                variable: "test",
+            },
+        });
+        return expect(
+          result
+        )
+          .toMatchObject({
+              a: "world",
+              b: 2,
+              c: 3,
+          });
+    });
+});

@@ -31,14 +31,14 @@ $ npm i --save vault-sync
 ### 2. Examples
 #### ./sync-config.ts
 ```js
-const vault = require("vault-sync");
+import vault from "vault-sync";
 
-module.exports = vault(async (get, list) => {
+module.exports = vault(async (get, list, { dbType }) => {
     return {
         app: (await get("secret/data/test")).data.hello,
         keys: (await list("secret/metadata")).keys,
         foo: {
-            db: (await get("database/mysql/test")),
+            db: (await get(`database/${dbType}/test`)),
             foo: "other-property",
             bar: [1,2,3],
         },
@@ -51,6 +51,11 @@ module.exports = vault(async (get, list) => {
     // alternative auth method for kubernetes pod
     method: "kubernetes",
     role: "default",
+    
+    // inject some variable
+    sandbox: {
+        dbType: process.env.DB_TYPE || "mysql",
+    },
 });
 ```
 
@@ -64,7 +69,7 @@ console.log(config);
 
 #### ./async-config-example.js
 ```js
-const vault = require("vault-sync");
+const vault = require("vault-sync").default;
 
 // rather do asynchronously
 vault.async(async get => { ... }, { ... })
@@ -75,7 +80,7 @@ vault.async(async get => { ... }, { ... })
 
 #### ./production-example1.js
 ```js
-const vault = require("vault-sync");
+const vault = require("vault-sync").default;
 
 /*
  * Read mandatory environment variables
@@ -102,7 +107,7 @@ module.exports = vault(async get => {
 
 #### ./production-example2.js
 ```js
-const vault = require("vault-sync");
+const vault = require("vault-sync").default;
 
 /*
  * Read mandatory environment variables
@@ -160,6 +165,8 @@ yarn test:badge
 ### 3. Mocking K8S pod environment
 ```
 sudo sh -c "mkdir -p /var/run/secrets/kubernetes.io/serviceaccount/ && kubectl get -n default secret $(kubectl get sa default -n default -o jsonpath='{.secrets[0].name}') -o json | jq '.data.token' -r | base64 -D > /var/run/secrets/kubernetes.io/serviceaccount/token"
+
+(or just) yarn mock
 ```
 
 ### 4. Publish

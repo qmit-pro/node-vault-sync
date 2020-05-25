@@ -1,24 +1,22 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.VaultReader = exports.VaultError = exports.K8S_SA_TOKEN_PATH = exports.VAULT_TOKEN_PATH = void 0;
 const tslib_1 = require("tslib");
 const fs_1 = tslib_1.__importDefault(require("fs"));
 const path_1 = tslib_1.__importDefault(require("path"));
 const node_fetch_1 = tslib_1.__importDefault(require("node-fetch"));
-// @ts-ignore
-const VAULT_TOKEN_PATH = path_1.default.join(process.env.HOME, ".vault-token");
-const K8S_SA_TOKEN_PATH = "/var/run/secrets/kubernetes.io/serviceaccount/token";
+exports.VAULT_TOKEN_PATH = path_1.default.join(process.env.HOME, ".vault-token");
+exports.K8S_SA_TOKEN_PATH = "/var/run/secrets/kubernetes.io/serviceaccount/token";
 function vaultAsync(factory, opts) {
-    return tslib_1.__awaiter(this, void 0, void 0, function* () {
-        // validate arguments
-        if (typeof factory != "function") {
-            throw new Error("First argument should be a factory function which returns configuration value");
-        }
-        else if (typeof opts != "object") {
-            throw new Error("Second argument should be a object for Vault connection option");
-        }
-        const reader = new VaultReader(opts);
-        return yield reader.generateWithFactory(factory);
-    });
+    // validate arguments
+    if (typeof factory != "function") {
+        throw new Error("First argument should be a factory function which returns configuration value");
+    }
+    else if (typeof opts != "object") {
+        throw new Error("Second argument should be a object for Vault connection option");
+    }
+    const reader = new VaultReader(opts);
+    return reader.generateWithFactory(factory);
 }
 exports.default = vaultAsync;
 class VaultError extends Error {
@@ -27,6 +25,7 @@ class VaultError extends Error {
         this.code = code;
     }
 }
+exports.VaultError = VaultError;
 class VaultReader {
     constructor(opts) {
         this.opts = {
@@ -46,13 +45,13 @@ class VaultReader {
                 return;
             }
             const { uri, method, role, debug, ignoreLocalToken, ignoreK8sSAToken } = this.opts;
-            let vaultToken = null;
-            if (!ignoreLocalToken && fs_1.default.existsSync(VAULT_TOKEN_PATH)) {
-                vaultToken = fs_1.default.readFileSync(VAULT_TOKEN_PATH).toString();
+            let vaultToken;
+            if (!ignoreLocalToken && fs_1.default.existsSync(exports.VAULT_TOKEN_PATH)) {
+                vaultToken = fs_1.default.readFileSync(exports.VAULT_TOKEN_PATH).toString();
                 debug && console.log("read local vault token:", vaultToken);
             }
-            else if (!ignoreK8sSAToken && fs_1.default.existsSync(K8S_SA_TOKEN_PATH)) {
-                const jwt = fs_1.default.readFileSync(K8S_SA_TOKEN_PATH).toString();
+            else if (!ignoreK8sSAToken && fs_1.default.existsSync(exports.K8S_SA_TOKEN_PATH)) {
+                const jwt = fs_1.default.readFileSync(exports.K8S_SA_TOKEN_PATH).toString();
                 debug && console.log("read k8s sa token:", jwt);
                 vaultToken = yield node_fetch_1.default(`${uri}/v1/auth/${method}/login`, {
                     method: "POST",
@@ -73,12 +72,12 @@ class VaultReader {
             else {
                 throw new VaultError("Failed to read both vault token and k8s service account token", 401);
             }
-            this.token = vaultToken;
+            this.token = vaultToken || null;
         });
     }
     generateWithFactory(factory) {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
-            return factory(this.read.bind(this), this.list.bind(this));
+            return factory(this.read.bind(this), this.list.bind(this), this.opts.sandbox);
         });
     }
     call(itemPath, method) {
@@ -112,4 +111,5 @@ class VaultReader {
         });
     }
 }
+exports.VaultReader = VaultReader;
 //# sourceMappingURL=async.js.map
