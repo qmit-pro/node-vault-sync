@@ -77,7 +77,7 @@ class VaultReader {
     }
     generateWithFactory(factory) {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
-            return factory(this.read.bind(this), this.list.bind(this), this.opts.sandbox);
+            return factory(this.read.bind(this), this.list.bind(this), (this.opts.sandbox || {}));
         });
     }
     call(itemPath, method) {

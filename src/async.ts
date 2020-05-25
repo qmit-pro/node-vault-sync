@@ -17,7 +17,7 @@ export default function vaultAsync<T, S>(factory: VaultReaderFactory<T, S>, opts
   return reader.generateWithFactory(factory);
 }
 
-export type VaultReaderOptions<S extends {[key: string]: any} | undefined = undefined> = {
+export type VaultReaderOptions<S extends {} = {[key: string]: any}> = {
   uri: string
   method: string
   role: string
@@ -27,7 +27,7 @@ export type VaultReaderOptions<S extends {[key: string]: any} | undefined = unde
   sandbox?: S;
 };
 
-export type VaultReaderFactory<T = any, S = any> = (get: (itemPath: string) => Promise<any>, list: (itemPath: string) => Promise<any>, sandbox?: S) => Promise<T>;
+export type VaultReaderFactory<T = any, S = any> = (get: (itemPath: string) => Promise<any>, list: (itemPath: string) => Promise<any>, sandbox: NonNullable<S>) => Promise<T>;
 
 export class VaultError extends Error {
   private code: number;
@@ -95,7 +95,7 @@ export class VaultReader<S> {
   }
 
   async generateWithFactory<T = any>(factory: VaultReaderFactory<T, S>) {
-    return factory(this.read.bind(this), this.list.bind(this), this.opts.sandbox);
+    return factory(this.read.bind(this), this.list.bind(this), (this.opts.sandbox || {}) as NonNullable<S>);
   }
 
   async call(itemPath: string, method: string) {

@@ -3,8 +3,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const tslib_1 = require("tslib");
 const async_1 = tslib_1.__importDefault(require("./async"));
 function rpcWorker() {
-    return function ([factory, opts]) {
-        return async_1.default(eval(factory), opts);
+    return function ([serializedFactory, serializedOpts]) {
+        return async_1.default(eval(serializedFactory), JSON.parse(serializedOpts));
     };
 }
 exports.default = rpcWorker;

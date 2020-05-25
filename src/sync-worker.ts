@@ -1,7 +1,7 @@
-import vaultAsync, { VaultReaderFactory, VaultReaderOptions } from "./async";
+import vaultAsync from "./async";
 
 export default function rpcWorker() {
-  return function([factory, opts]: [string, VaultReaderOptions]) {
-    return vaultAsync(eval(factory), opts);
+  return function([serializedFactory, serializedOpts]: [string, string]) {
+    return vaultAsync(eval(serializedFactory), JSON.parse(serializedOpts));
   };
 }

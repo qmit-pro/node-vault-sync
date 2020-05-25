@@ -1,2 +1,1 @@
-import { VaultReaderOptions } from "./async";
-export default function rpcWorker(): ([factory, opts]: [string, VaultReaderOptions]) => Promise<unknown>;
+export default function rpcWorker(): ([serializedFactory, serializedOpts]: [string, string]) => Promise<unknown>;
